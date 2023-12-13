@@ -1,0 +1,63 @@
+CREATE TABLE Deals (
+    DealID INT PRIMARY KEY,
+    LeadSource VARCHAR(50),
+    DealStage VARCHAR(50),
+    Amount DECIMAL(10, 2),
+    CloseDate DATE,
+    EntryDate DATE,
+    Salesperson VARCHAR(50)
+);
+
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    ContactInfo VARCHAR(100),
+    Industry VARCHAR(50),
+    Location VARCHAR(100)
+);
+
+
+SELECT COUNT(*) AS LeadCount
+FROM sales_pipeline_v1.deals
+WHERE DealStage = 'Lead';
+
+SELECT COUNT(*) AS ProspectCount
+FROM sales_pipeline_v1.deals
+WHERE DealStage = 'Prospect';
+
+SELECT
+    (COUNT(CASE WHEN DealStage = 'Prospect' THEN 1 END) / COUNT(CASE WHEN DealStage = 'Lead' THEN 1 END)) * 100 AS ConversionRate
+FROM sales_pipeline_v1.deals
+WHERE DealStage IN ('Lead', 'Prospect');
+
+SELECT
+    LeadSource,
+    SUM(Amount) AS TotalSalesAmount
+FROM sales_pipeline_v1.Deals
+GROUP BY LeadSource
+ORDER BY TotalSalesAmount DESC
+LIMIT 5;
+
+SELECT
+    Salesperson,
+    COUNT(DealID) AS TotalDealsClosed,
+    SUM(Amount) AS CumulativeSalesAmount
+FROM sales_pipeline_v1.deals
+GROUP BY Salesperson
+ORDER BY CumulativeSalesAmount DESC; 
+
+SELECT
+    Salesperson,
+    COUNT(DealID) AS TotalDealsClosed,
+    SUM(Amount) AS CumulativeSalesAmount
+FROM sales_pipeline_v1.deals
+WHERE DealStage = "Closed Won"
+GROUP BY Salesperson
+ORDER BY CumulativeSalesAmount DESC;
+
+SELECT
+    DealStage,
+    AVG(DATEDIFF(NOW(), EntryDate)) AS AverageDealAgeInDays
+FROM sales_pipeline_v1.Deals
+WHERE DealStage = 'Negotiating'
+GROUP BY DealStage;
